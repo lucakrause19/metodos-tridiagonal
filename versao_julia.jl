@@ -35,7 +35,7 @@ function residuo(result,B,resid,n)
        end
        end
 
-function normaLinha(resid,n)
+ function normaLinha(resid,n)
        prov_max = 0.0
        for i in 1:n
        resid[i] = abs(resid[i])
@@ -50,8 +50,8 @@ function normaLinha(resid,n)
 
 function comparar(result,V,n)
        for i in 1:n
-       if result[i] == V[i] return true
-       else return false
+       if result[i] != V[i] return false
+            else return true
        end
        end
        end
@@ -85,7 +85,40 @@ function jacobi(B,V,s_inicial,n,it,armazenamento)
        println("Vetor resultado real:      ", V)
 end
 
-n = 10
+function gseidel(B,V,s_inicial,n,it,armazenamento)
+    for m in 1:n
+    s_inicial[m] = 0.0
+    end
+    soma = 0.0
+    result = Array{Float64}(undef,n)
+    resid = Array{Float64}(undef,n)
+    for k in 1:it
+    for i in 1:n
+    soma = 0.0
+    for j in 1:(i-1)
+    soma += (elemento(i,j)*result[j])
+    end
+    for l in i+1:n
+    soma+= (elemento(i,l)*s_inicial[l])
+    end
+    result[i] = (B[i] - soma)/elemento(i,i)
+    soma = 0.0
+    end
+    for y in 1:n
+    s_inicial[y] = result[y]
+    end
+    residuo(result,B,resid,n)
+    armazenamento[k] = normaLinha(resid,n)
+    end
+    if (comparar(result,V,n)) println("O resultado confere com o esperado.")
+    else println("O resultado não confere com o esperado.")
+    end
+end
+    
+    
+    
+
+n = 100
 it = 100
 B = Array{Float64}(undef,n)
 V = Array{Float64}(undef,n)
@@ -96,5 +129,5 @@ armazenamento = Array{Float64}(undef,it)
 
 gerarV(V,n)
 calcularB(V,B,n)
-jacobi(B,V,s_inicial,n,it,armazenamento)
+gseidel(B,V,s_inicial,n,it,armazenamento)
 armazenamento
